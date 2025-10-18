@@ -1,0 +1,158 @@
+<!-- superadmin.html -->
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Super Admin Dashboard - HIMATE E-VOTE</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="superadmin-container">
+        <header class="superadmin-header">
+            <img src="{{ url_for('static', filename='img/himate_logo.png') }}" alt="HIMATE Logo" class="admin-logo">
+            <h1>Super Admin Dashboard</h1>
+            <nav class="admin-nav">
+                <a href="/superadmin" class="nav-link active" onclick="showSection('dashboard')">Dashboard</a>
+                <a href="#" class="nav-link" onclick="showSection('candidates')">Kelola Kandidat</a>
+                <a href="#" class="nav-link" onclick="showSection('voters')">Daftar Pemilih</a>
+                <a href="#" class="nav-link" onclick="showSection('logs')">Log Aktivitas</a>
+                <a href="/logout" class="nav-link logout">Logout</a>
+            </nav>
+        </header>
+
+        <main class="superadmin-main">
+            <!-- Dashboard Section -->
+            <section id="dashboard" class="admin-section active">
+                <h2>Statistik Real-time</h2>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3>Total Pemilih Terdaftar</h3>
+                        <p id="totalVoters">0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Suara Masuk</h3>
+                        <p id="totalVotes">0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Tingkat Partisipasi</h3>
+                        <p id="turnout">0%</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Bilik Aktif</h3>
+                        <p id="activeBooths">0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Antrian Menunggu</h3>
+                        <p id="queueLength">0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Total Kandidat Aktif</h3>
+                        <p id="activeCandidates">0</p>
+                    </div>
+                </div>
+
+                <div class="export-section">
+                    <button id="exportCSV" class="admin-btn">Export Hasil ke CSV</button>
+                    <button id="exportPDF" class="admin-btn" style="background: #ff9800; margin-left: 10px;">Export ke PDF</button>
+                </div>
+
+                <div class="chart-container">
+                    <canvas id="voteChart"></canvas>
+                </div>
+
+                <div class="detailed-stats">
+                    <h3>Distribusi Suara</h3>
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Kandidat</th>
+                                <th>Suara</th>
+                                <th>Persentase</th>
+                            </tr>
+                        </thead>
+                        <tbody id="voteTable">
+                            <!-- Data will be populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Kelola Kandidat Section -->
+            <section id="candidates" class="admin-section">
+                <h2>Kelola Kandidat</h2>
+                <form id="addCandidateForm" class="admin-form">
+                    <div class="form-group">
+                        <label for="candName">Nama Kandidat:</label>
+                        <input type="text" id="candName" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="candDesc">Deskripsi:</label>
+                        <textarea id="candDesc" name="description"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="candPhoto">Path Foto (e.g., /static/img/kandidat4.jpg):</label>
+                        <input type="text" id="candPhoto" name="photo" required>
+                    </div>
+                    <button type="submit" class="admin-btn">Tambah Kandidat</button>
+                </form>
+
+                <h3>Daftar Kandidat</h3>
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nama</th>
+                            <th>Deskripsi</th>
+                            <th>Foto</th>
+                            <th>Status</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="candidatesTable">
+                        <!-- Data will be populated by JS -->
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- Daftar Pemilih Section -->
+            <section id="voters" class="admin-section">
+                <h2>Daftar Pemilih</h2>
+                <div class="search-filter">
+                    <input type="text" id="voterSearch" placeholder="Cari NIM atau Nama...">
+                    <button onclick="loadVoters()" class="admin-btn" style="padding: 8px 16px;">Refresh</button>
+                </div>
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>NIM</th>
+                            <th>Nama</th>
+                            <th>Status Voting</th>
+                            <th>Waktu Registrasi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="votersTable">
+                        <!-- Data will be populated by JS -->
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- Lihat Log Section -->
+            <section id="logs" class="admin-section">
+                <h2>Log Aktivitas Real-time</h2>
+                <div class="log-tabs">
+                    <button class="tab-btn active" onclick="loadLog('absensi')">Log Absensi</button>
+                    <button class="tab-btn" onclick="loadLog('vote')">Log Vote</button>
+                </div>
+                <pre id="logContent" class="log-content"></pre>
+                <button onclick="loadLog(document.querySelector('.tab-btn.active').textContent.toLowerCase().replace('log ', ''))" class="admin-btn" style="margin-top: 10px;">Refresh Log</button>
+            </section>
+        </main>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+</body>
+</html>

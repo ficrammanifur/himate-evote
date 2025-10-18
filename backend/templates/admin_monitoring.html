@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Monitoring - HIMATE E-VOTE</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="superadmin-container">
+        <header class="superadmin-header">
+            <img src="{{ url_for('static', filename='img/himate_logo.png') }}" alt="HIMATE Logo" class="admin-logo">
+            <h1>Admin Monitoring Realtime</h1>
+            <nav class="admin-nav">
+                <a href="/admin_monitoring" class="nav-link active">Monitoring</a>
+                <a href="/logout" class="nav-link logout">Logout</a>
+            </nav>
+        </header>
+
+        <main class="superadmin-main">
+            <section id="monitoring" class="admin-section active">
+                <h2>Hasil Pemilihan Realtime</h2>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3>Total Pemilih</h3>
+                        <p id="totalVoters">0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Suara Masuk</h3>
+                        <p id="totalVotes">0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Tingkat Partisipasi</h3>
+                        <p id="turnout">0%</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Bilik Aktif</h3>
+                        <p id="activeBooths">0</p>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <canvas id="voteChart"></canvas>
+                </div>
+
+                <div class="log-tabs" style="margin-top: 30px;">
+                    <button class="tab-btn active" onclick="loadLog('absensi')">Log Absensi</button>
+                    <button class="tab-btn" onclick="loadLog('vote')">Log Vote</button>
+                </div>
+                <pre id="logContent" class="log-content"></pre>
+                <button onclick="loadLog(document.querySelector('.tab-btn.active').textContent.toLowerCase().replace('log ', ''))" class="admin-btn" style="margin-top: 10px; width: auto;">Refresh Log</button>
+            </section>
+        </main>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+    <script>
+        // Init for monitoring page
+        document.addEventListener('DOMContentLoaded', function() {
+            if (window.location.pathname === '/admin_monitoring') {
+                socket = io();
+                socket.on('vote_update', function(stats) {
+                    updateStats(stats);
+                    updateChart(stats);
+                });
+                loadStats();
+                loadLog('absensi');
+            }
+        });
+    </script>
+</body>
+</html>
